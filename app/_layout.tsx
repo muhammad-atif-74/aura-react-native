@@ -1,24 +1,60 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import GlobalProvider from '@/context/GlobalProvider';
+import { useFonts } from 'expo-font';
+import { SplashScreen, Stack } from 'expo-router';
+import React, { useEffect } from 'react';
+import '../global.css';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+// appname
+// APPWRITE_PROJECT_ID: "69609e79001d747179b4"
+// APPWRITE_PROJECT_NAME: "react-native-aura"
+// APPWRITE_PUBLIC_ENDPOINT: "https://fra.cloud.appwrite.io/v1"
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+SplashScreen.preventAutoHideAsync(); // prevent splash screen from autohiding
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+const RootLayout = () => {
+  const [fontsLoaded, error] = useFonts({
+    "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
+  })
+
+  useEffect(() => {
+    if (error) throw error;
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, error]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    // <Slot />
+    <GlobalProvider>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen
+          name='index'
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name='(auth)'
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+          name='(tabs)'
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen
+        name='search/[query]'
+        options={{
+          headerShown: false
+        }}
+        />
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    </GlobalProvider>
+
+  )
 }
+
+export default RootLayout

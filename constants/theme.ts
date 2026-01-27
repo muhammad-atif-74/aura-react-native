@@ -51,3 +51,18 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+export const Icons = {
+  home: require('../assets/icons/home.png'),
+  bookmark: require('../assets/icons/bookmark.png'),
+  profile: require('../assets/icons/profile.png'),
+  plus: require('../assets/icons/plus.png'),
+}
+
+export const Images = {
+  logo: require('../assets/images/logo.png'),
+  splash: require('../assets/images/splashImage.png'),
+  underline: require('../assets/images/underline.png'),
+  logoSm: require('../assets/images/logo-sm.png'),
+  emptyState: require('../assets/images/emptyState.png'),
+}
