@@ -1,5 +1,7 @@
+import { File } from '@/app/(tabs)/create';
 import { Post } from '@/types';
-import { Account, Avatars, Client, Databases, ID, Query } from 'react-native-appwrite';
+import axios from "axios";
+import { Account, Avatars, Client, Databases, ID, Query, Storage } from 'react-native-appwrite';
 
 export const appwriteConfig = {
     endpoint: "https://cloud.appwrite.io/v1",
@@ -23,6 +25,7 @@ client
 const account = new Account(client);
 const avatars = new Avatars(client);
 const databases = new Databases(client);
+const storage = new Storage(client);
 
 export const createUser = async (email: string, password: string, username: string) => {
     try {
@@ -109,11 +112,12 @@ export const getAllPosts = async () => {
     try {
         const posts = await databases.listDocuments(
             appwriteConfig.databaseId,
-            appwriteConfig.videosTable
+            appwriteConfig.videosTable,
+            [Query.orderDesc('$createdAt'), Query.limit(10)]
         );
 
         // console.log("___ Posts from Appwrite:", posts);
-        
+
         return posts.documents.map((doc) => ({
             $id: doc.$id,
             title: doc.title,
@@ -139,7 +143,7 @@ export const getLatestPosts = async () => {
         );
 
         console.log("___ Latest from Appwrite:", posts);
-        
+
         return posts.documents.map((doc) => ({
             $id: doc.$id,
             title: doc.title,
@@ -162,7 +166,7 @@ export const searchPosts = async (query: string) => {
             appwriteConfig.videosTable,
             [Query.search('title', query)]
         );
-        
+
         return posts.documents.map((doc) => ({
             $id: doc.$id,
             title: doc.title,
@@ -184,9 +188,9 @@ export const getUserPosts = async (userId: string) => {
         const posts = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.videosTable,
-            [Query.equal('creator', userId)]
+            [Query.equal('creator', userId), Query.orderDesc('$createdAt') ]
         );
-        
+
         return posts.documents.map((doc) => ({
             $id: doc.$id,
             title: doc.title,
@@ -198,6 +202,84 @@ export const getUserPosts = async (userId: string) => {
     }
     catch (err: any) {
         console.log("Error getting posts:", err);
+        throw new Error(err);
+    }
+}
+
+const uploadFile = async (
+    file: any,
+    type: "image" | "video"
+) => {
+    if (!file?.uri) return null;
+
+    const formData = new FormData();
+
+    formData.append("file", {
+        uri: file.uri,
+        name: file.name || `upload.${type === "image" ? "jpg" : "mp4"}`,
+        type: file.mimeType || (type === "image" ? "image/jpeg" : "video/mp4"),
+    } as any);
+
+    formData.append("upload_preset", "Unsigned");
+
+    const uploadUrl =
+        type === "image"
+            ? "https://api.cloudinary.com/v1_1/dslzcqalg/image/upload"
+            : "https://api.cloudinary.com/v1_1/dslzcqalg/video/upload";
+
+    const res = await axios.post(uploadUrl, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+        timeout: 30000,
+    });
+
+    return res.data.secure_url;
+};
+
+
+interface PostData {
+    title: string;
+    video: File | null;
+    thumbnail: File | null;
+    prompt: string;
+    userId: string;
+}
+export const createPost = async (formData: PostData) => {
+    try {
+        console.log("createPost: ", formData)
+        const [thumbnailUrl, videoUrl] = await Promise.all([
+            uploadFile(formData.thumbnail, 'image'),
+            uploadFile(formData.video, 'video'),
+        ]);
+
+        console.log("Final data: ", {
+            title: formData.title,
+            prompt: formData.prompt,
+            thumbnail: thumbnailUrl,
+            video: videoUrl,
+            creator: formData.userId
+        })
+
+
+        const newPost = await databases.createDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.videosTable,
+            ID.unique(),
+            {
+                title: formData.title,
+                prompt: formData.prompt,
+                thumbnail: thumbnailUrl,
+                video: videoUrl,
+                creator: formData.userId
+            }
+        )
+
+        return newPost;
+
+    }
+    catch (err: any) {
+        console.log("Error creating post:", err);
         throw new Error(err);
     }
 }
