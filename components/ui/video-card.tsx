@@ -23,17 +23,33 @@ const VideoCard = ({ post: { $id, title, thumbnailUrl, videoUrl, prompt, bookmar
         }
     }
 
-    const handleDelete = async (id: string) => {
-        try{
-            await deletePost(id);
-            Alert.alert("Success", "Post deleted successfully.");
-            setRefreshFeed(true); // Trigger feed refresh after deletion
-        }
-        catch(err: any){
-            Alert.alert("Error", "Failed to delete the post. Please try again.");
-        }
-
-    }
+    const handleDelete = (id: string) => {
+        Alert.alert(
+          "Delete Post",
+          "Are you sure you want to delete this post? This action cannot be undone.",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: async () => {
+                try {
+                  await deletePost(id)
+                  Alert.alert("Success", "Post deleted successfully.")
+                  setRefreshFeed(true)
+                } catch (err) {
+                  Alert.alert("Error", "Failed to delete the post. Please try again.")
+                }
+              },
+            },
+          ],
+          { cancelable: true }
+        )
+      }
+      
 
     return (
         <View className='flex-col items-center px-4 mb-14'>
