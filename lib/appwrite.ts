@@ -125,6 +125,7 @@ export const getAllPosts = async () => {
             videoUrl: doc.video,
             thumbnailUrl: doc.thumbnail,
             createdAt: doc.$createdAt,
+            bookmarks: doc.bookmarks || []
         })) as Post[]
     }
     catch (err: any) {
@@ -198,6 +199,7 @@ export const getUserPosts = async (userId: string) => {
             videoUrl: doc.video,
             thumbnailUrl: doc.thumbnail,
             createdAt: doc.$createdAt,
+            bookmarks: doc.bookmarks || []
         })) as Post[]
     }
     catch (err: any) {
@@ -280,6 +282,80 @@ export const createPost = async (formData: PostData) => {
     }
     catch (err: any) {
         console.log("Error creating post:", err);
+        throw new Error(err);
+    }
+}
+
+export const bookmarkPost = async (postId: string, userId: string, bookmark: boolean) => {
+    console.log("Bookmarking post:", { postId, userId, bookmark });
+    try {
+        const post = await databases.getDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.videosTable,
+            postId
+        );
+
+        let updatedBookmarks = post.bookmarks || [];
+
+        if (bookmark) {
+            updatedBookmarks.push(userId);
+        } else {
+            updatedBookmarks = updatedBookmarks.filter((id: string) => id !== userId);
+        }
+
+        await databases.updateDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.videosTable,
+            postId,
+            {
+                bookmarks: updatedBookmarks
+            }
+        );
+        console.log("Post updated with new bookmarks:", updatedBookmarks);
+
+        return updatedBookmarks;
+    }
+    catch (err: any) {
+        console.log("Error bookmarking post:", err);
+        throw new Error(err);
+    }
+}
+
+export const getBookmarks = async (userId: string) => {
+    try {
+        const posts = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.videosTable,
+            [Query.search('bookmarks', userId)]
+        );
+
+        return posts.documents.map((doc) => ({
+            $id: doc.$id,
+            title: doc.title,
+            prompt: doc.prompt,
+            videoUrl: doc.video,
+            thumbnailUrl: doc.thumbnail,
+            createdAt: doc.$createdAt,
+            bookmarks: doc.bookmarks || []
+        })) as Post[]
+    }
+    catch (err: any) {
+        console.log("Error fetching bookmarks:", err);
+        throw new Error(err);
+    }
+}
+
+export const deletePost = async (postId: string) => {
+    try{
+        await databases.deleteDocument(
+            appwriteConfig.databaseId,
+            appwriteConfig.videosTable,
+            postId
+        );
+        return true;
+    }
+    catch(err: any){
+        console.log("Error deleting post:", err);
         throw new Error(err);
     }
 }

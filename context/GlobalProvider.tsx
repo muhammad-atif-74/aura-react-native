@@ -7,6 +7,8 @@ type GlobalContextType = {
     user: any;
     setUser: React.Dispatch<React.SetStateAction<any>>;
     isLoading: boolean;
+    setRefreshFeed: React.Dispatch<React.SetStateAction<boolean>>;
+    refreshFeed: boolean;
 };
 
 const GlobalContext = createContext<GlobalContextType | null>(null);
@@ -25,6 +27,7 @@ const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
     const [user, setUser] = React.useState<any>(null);
     const [isLoading, setIsLoading] = React.useState(true);
+    const [refreshFeed, setRefreshFeed] = React.useState(false);
 
     useEffect(() => {
         let mounted = true;
@@ -59,7 +62,9 @@ const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
             setIsLoggedIn,
             user,
             setUser,
-            isLoading
+            isLoading,
+            setRefreshFeed,
+            refreshFeed
         }}>
             {children}
         </GlobalContext.Provider>

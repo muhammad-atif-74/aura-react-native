@@ -2,7 +2,7 @@ import { Post } from '@/types';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { ResizeMode, Video } from 'expo-av';
 import React from 'react';
-import { FlatList, ImageBackground, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, ImageBackground, TouchableOpacity, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 
 const zoomIn: Animatable.CustomAnimation = {
@@ -25,6 +25,7 @@ const zoomOut = {
 
 export const TrendingItem = ({ activeItem, item }: { activeItem: string, item: Post }) => {
     const [playing, setPlaying] = React.useState(false);
+    const [loadingImage, setLoadingImage] = React.useState(true);
     return (
         <Animatable.View
             className='mr-5 '
@@ -34,14 +35,14 @@ export const TrendingItem = ({ activeItem, item }: { activeItem: string, item: P
             {
                 playing ? (
                     <View
-                        
+
                         className="w-52 h-72 mt-3 rounded-[35px] overflow-hidden shadow-lg bg-white/10 justify-center items-center"
                     >
                         <Video
                             source={{ uri: item.videoUrl }}
                             className='w-52 h-72 rounded-[35px] mt-3 shadow-lg bg-white/10'
                             resizeMode={ResizeMode.CONTAIN}
-                            style={{ width: '100%', height: '100%' }} 
+                            style={{ width: '100%', height: '100%' }}
                             useNativeControls
                             shouldPlay
                             onPlaybackStatusUpdate={status => {
@@ -61,9 +62,21 @@ export const TrendingItem = ({ activeItem, item }: { activeItem: string, item: P
                             source={{ uri: item.thumbnailUrl }}
                             className='w-52 h-72 rounded-[35px] my-5 overflow-hidden shadow-lg shadow-black/40'
                             resizeMode='cover'
+                            onLoadStart={() => setLoadingImage(true)}
+                            onLoadEnd={() => setLoadingImage(false)}
                         />
-                        <FontAwesome className='absolute' name="play-circle" size={48} color="gray" />
-
+                        {
+                            loadingImage && (
+                                <View className='absolute w-full h-full  rounded-[35px] inset-0 justify-center items-center bg-gray-300'>
+                                    <ActivityIndicator size="small" color="#999" className='mt-2' />
+                                </View>
+                            )
+                        }
+                        {
+                            !loadingImage && (
+                                    <FontAwesome className='absolute' name="play-circle" size={48} color="gray" />
+                            )
+                        }
                     </TouchableOpacity>
                 )
             }

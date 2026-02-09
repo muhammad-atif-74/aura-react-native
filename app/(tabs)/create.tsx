@@ -26,7 +26,7 @@ interface FormState {
 }
 
 const create = () => {
-  const {user} = useGlobalContext()
+  const {user, setRefreshFeed} = useGlobalContext()
 
   const [uploading, setuploading] = useState(false)
   const [form, setform] = useState<FormState>({
@@ -67,6 +67,7 @@ const create = () => {
       await createPost({...form, userId: user.$id})
 
       Alert.alert("Success", "Your post has been uploaded successfully!")
+      setRefreshFeed(true)
       router.push('/home')
     }
     catch(err){

@@ -5,7 +5,8 @@ export type Post = {
     videoUrl: string;
     thumbnailUrl: string;
     createdAt: string;
-    creator: User
+    creator: User;
+    bookmarks: string[]; // array of userIds who bookmarked the post
 }
 
 export type User = {

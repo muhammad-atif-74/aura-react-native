@@ -7,13 +7,13 @@ import { useGlobalContext } from '@/context/GlobalProvider'
 import useAppwrite from '@/hooks/use-appwrite'
 import { getAllPosts, getLatestPosts } from '@/lib/appwrite'
 import { Post } from '@/types'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FlatList, Image, RefreshControl, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const Home = () => {
   const [refreshing, setRefreshing] = useState(false)
-    const { user } = useGlobalContext()
+    const { user, refreshFeed, setRefreshFeed } = useGlobalContext()
   
   const {
     data: posts,
@@ -36,6 +36,12 @@ const Home = () => {
     setRefreshing(false)
   }
 
+  useEffect(() => {
+    if (refreshFeed) {
+      onRefresh()
+      setRefreshFeed(false)
+    }
+  }, [refreshFeed])
  
   return (
     <SafeAreaView className='bg-primary h-full'>

@@ -7,12 +7,12 @@ import { getUserPosts, signOut } from '@/lib/appwrite'
 import { Post } from '@/types'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { router } from 'expo-router'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { FlatList, Image, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const Profile = () => {
-  const { user, isLoggedIn, setIsLoggedIn, setUser } = useGlobalContext()
+  const { user, isLoggedIn, setIsLoggedIn, setUser, refreshFeed, setRefreshFeed } = useGlobalContext()
 
   const handleLogout = async () => {
     await signOut();
@@ -21,13 +21,27 @@ const Profile = () => {
     router.replace('/signIn');
   }
 
-  if(!user) return
-  
   const {
     data: posts,
     refetch,
     dataLoading: postsLoading
-  } = useAppwrite<Post[]>(() => getUserPosts(user.$id))
+  } = useAppwrite<Post[]>(async () => {
+    if (!user) return []
+    return await getUserPosts(user.$id)
+  })
+
+
+
+  const onRefresh = async () => {
+    await refetch()
+  }
+
+  useEffect(() => {
+    if (refreshFeed) {
+      onRefresh()
+      setRefreshFeed(false)
+    }
+  }, [refreshFeed])
 
   return (
     <SafeAreaView className='bg-primary h-full'>
@@ -36,7 +50,7 @@ const Profile = () => {
         data={posts}
         keyExtractor={(item) => item.$id.toString()}
         renderItem={({ item }) => (
-          <VideoCard post={item} />
+          <VideoCard post={item} isOwnItem={true} />
         )}
 
         ListHeaderComponent={() => (
@@ -45,11 +59,12 @@ const Profile = () => {
               <MaterialCommunityIcons name="logout" size={24} color="red" />
             </TouchableOpacity>
 
-            <View className='w-16 h-16 border border-secondary rounded-lg justify-center items-center'>
-              <Image 
-                source={{ uri: user?.avatar }}
-                className='w-[90%] h-[90%] rounded-lg'
-                resizeMode='cover'
+            <View className='w-16 h-16 border border-secondary rounded-full overflow-hidden justify-center items-center'>
+              <Image
+                source={ require('@/assets/images/placeloder-profile.jpg')
+                }
+                className="w-[100%] h-[100%] rounded-lg"
+                resizeMode="cover"
               />
 
             </View>
@@ -57,11 +72,11 @@ const Profile = () => {
             <InfoBox title={user?.username} containerStyles="mt-5" titleStyles="text-lg" />
 
             <View className='mt-5 flex-row'>
-            <InfoBox title={posts?.length || 0} subTitle='Posts' containerStyles="mr-10" titleStyles="text-xl" />
-            <InfoBox title={"1.2k"} subTitle='Followers' titleStyles="text-xl" />
+              <InfoBox title={posts?.length || 0} subTitle='Posts' containerStyles="mr-10" titleStyles="text-xl" />
+              <InfoBox title={"1.2k"} subTitle='Followers' titleStyles="text-xl" />
 
             </View>
-          </View> 
+          </View>
 
         )}
 
