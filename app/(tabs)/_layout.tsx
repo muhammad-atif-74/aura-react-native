@@ -33,7 +33,7 @@ const _layout = () => {
                         backgroundColor: '#161622',
                         borderTopColor: '#232533',
                         borderTopWidth: 1,
-                        height: 80,
+                        height: 85,
                         paddingTop: 8
                     }
                 }}

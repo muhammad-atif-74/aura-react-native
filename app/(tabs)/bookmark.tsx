@@ -47,7 +47,7 @@ const bookmark = () => {
         )}
 
         ListHeaderComponent={() => (
-          <View className='my-6 px-4 w-full justify-center items-center mb-2 mt-6'>
+          <View className='my-6 px-4 w-full justify-center  mb-2 mt-6'>
             <Text className='text-[22px] font-medium font-poppins mb-[40px] text-white'>Bookmarks</Text>
           </View>
         )}

@@ -66,9 +66,9 @@ const VideoCard = ({ post: { $id, title, thumbnailUrl, videoUrl, prompt, bookmar
                     <TouchableOpacity activeOpacity={0.7} onPress={() => handlebookmark($id, isBookmarked ? false : true)}>
                         {
                             isBookmarked ? (
-                                <FontAwesome name="heart" size={18} color="red" />
+                                <FontAwesome name="bookmark" size={18} color="red" />
                             ) : (
-                                <FontAwesome name="heart-o" size={18} color="white" />
+                                <FontAwesome name="bookmark-o" size={18} color="white" />
                             )
                         }
                     </TouchableOpacity>
